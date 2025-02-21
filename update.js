@@ -19,5 +19,8 @@ cheerio.fromURL("https://factorio.com/galaxy").then((res) => {
   console.log("New", html.stars.users.length, "star count.");
   const diff = html.stars.users.length - hadStars;
   console.log("Difference of", (diff <= 0 ? "" : "+") + diff, "stars.");
+  html._credo = {};
+  html._credo.lastUpdate = new Date().getTime();
+  html._credo.diff = diff;
   fs.writeFileSync(starjson, JSON.stringify(html));
 });
