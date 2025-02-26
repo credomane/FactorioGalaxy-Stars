@@ -51,7 +51,7 @@ function fetchstars() {
     console.log("Old", oldStars, "star count.");
     console.log("New", newStars, "star count.");
     console.log("Difference of", (difStars <= 0 ? "" : "+") + difStars, "stars.");
-    if (diff !== 0) {
+    if (difStars !== 0) {
       fs.writeFileSync(starjson, JSON.stringify(html));
       loop();
     }
