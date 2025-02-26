@@ -6,6 +6,7 @@ const { exec } = require("child_process");
 const starjson = __dirname + "/stars.json";
 let oldStars = 0;
 let newStars = 0;
+let difStars = 0;
 
 try {
   oldStars = JSON.parse(fs.readFileSync(starjson, "utf8")).stars.users.length;
@@ -34,22 +35,24 @@ function gitpull() {
 }
 
 function fetchstars() {
-  const searchStr = "initSpacemapViewer";
   cheerio.fromURL("https://factorio.com/galaxy").then((res) => {
+    const searchStr = "initSpacemapViewer";
     let html = res("script:contains('" + searchStr + "')")[0].children[0].data;
     const offsetStart = html.indexOf(searchStr + "(") + (searchStr.length + 1);
     const offsetStop = html.indexOf(")});");
+
     html = JSON.parse(html.substr(offsetStart, offsetStop - offsetStart).trim());
-    console.log("Old", oldStars, "star count.");
-    console.log("New", html.stars.users.length, "star count.");
-    const diff = html.stars.users.length - oldStars;
-    console.log("Difference of", (diff <= 0 ? "" : "+") + diff, "stars.");
+    newStars = html.stars.users.length;
+    difStars = newStars - oldStars;
     html._credo = {};
     html._credo.lastUpdate = new Date().getTime();
-    html._credo.diff = diff;
+    html._credo.diff = difStars;
+
+    console.log("Old", oldStars, "star count.");
+    console.log("New", newStars, "star count.");
+    console.log("Difference of", (difStars <= 0 ? "" : "+") + difStars, "stars.");
     if (diff !== 0) {
       fs.writeFileSync(starjson, JSON.stringify(html));
-      newStars = html._credo.diff;
       loop();
     }
   });
@@ -66,7 +69,7 @@ function gitadd() {
 }
 
 function gitcommit() {
-  exec("git commit -m 'Updating stars.json with a change of " + newStars + " stars.'", (err, stdout, stderr) => {
+  exec("git commit -m 'Updating stars.json with a change of " + difStars + " stars.'", (err, stdout, stderr) => {
     if (err) {
       // node couldn't execute the command
       return;
