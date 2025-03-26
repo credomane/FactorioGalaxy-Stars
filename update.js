@@ -3,13 +3,13 @@ const fs = require("node:fs");
 
 const { exec } = require("child_process");
 
-const starjson = __dirname + "/stars.json";
+const starjson = __dirname + "/opts.json";
 let oldStars = 0;
 let newStars = 0;
 let difStars = 0;
 
 try {
-  oldStars = JSON.parse(fs.readFileSync(starjson, "utf8")).stars.users.length;
+  oldStars = JSON.parse(fs.readFileSync(starjson, "utf8")).starcount;
 } catch (err) {
   console.log("Failed to load previous stars.json");
 }
@@ -36,13 +36,13 @@ function gitpull() {
 
 function fetchstars() {
   cheerio.fromURL("https://factorio.com/galaxy").then((res) => {
-    const searchStr = "initSpacemapViewer";
+    const searchStr = "const opts = ";
     let html = res("script:contains('" + searchStr + "')")[0].children[0].data;
-    const offsetStart = html.indexOf(searchStr + "(") + (searchStr.length + 1);
-    const offsetStop = html.indexOf(")});");
+    const offsetStart = html.indexOf(searchStr) + searchStr.length;
+    const offsetStop = html.indexOf("};") + 1;
 
     html = JSON.parse(html.substr(offsetStart, offsetStop - offsetStart).trim());
-    newStars = html.stars.users.length;
+    newStars = html.starcount;
     difStars = newStars - oldStars;
     html._credo = {};
     html._credo.lastUpdate = new Date().getTime();
@@ -59,7 +59,7 @@ function fetchstars() {
 }
 
 function gitadd() {
-  exec("git add stars.json", (err, stdout, stderr) => {
+  exec("git add opts.json", (err, stdout, stderr) => {
     if (err) {
       // node couldn't execute the command
       return;
@@ -69,7 +69,7 @@ function gitadd() {
 }
 
 function gitcommit() {
-  exec("git commit -m 'Updating stars.json with a change of " + difStars + " stars.'", (err, stdout, stderr) => {
+  exec("git commit -m 'Updating opts.json with a change of " + difStars + " stars.'", (err, stdout, stderr) => {
     if (err) {
       // node couldn't execute the command
       return;
