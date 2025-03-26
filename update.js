@@ -16,7 +16,7 @@ try {
   console.log("Failed to load previous stars.json");
 }
 
-let steps = [gitpull, fetchopts, fetchstarpages]; //, gitadd, gitcommit, gitpush];
+let steps = [gitpull, fetchopts, fetchstarpages, gitadd, gitcommit, gitpush];
 
 loop(); //Kick off the steps.
 function loop() {
@@ -75,7 +75,6 @@ async function fetchstarpages() {
     pageData = await pageResponse.json();
     addStars(pageData.stars);
     fs.writeFileSync(`${__dirname}/stars.page-${i2}.json`, JSON.stringify(pageData));
-
   }
   const lastUpdateInOpts = new Date(lastOptsUpdate);
   if (lastUpdateInOpts > lastUpdate) {
@@ -89,7 +88,7 @@ async function fetchstarpages() {
 }
 
 function gitadd() {
-  exec("git add opts.json", (err, stdout, stderr) => {
+  exec("git add stars.*.json", (err, stdout, stderr) => {
     if (err) {
       // node couldn't execute the command
       return;
@@ -99,7 +98,7 @@ function gitadd() {
 }
 
 function gitcommit() {
-  exec("git commit -m 'Updating opts.json with a change of " + difStars + " stars.'", (err, stdout, stderr) => {
+  exec("git commit -m 'Updating star files with a change of " + difStars + " stars.'", (err, stdout, stderr) => {
     if (err) {
       // node couldn't execute the command
       return;
